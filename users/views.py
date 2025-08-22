@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .forms import RegisterForm, UserProfileForm
+from .forms import RegisterForm, UserProfileForm, SimpleLoginForm
 from .models import UserProfile
 from submissions.models import Submission
 
@@ -15,15 +15,47 @@ def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, f'🎉 Your account "{user.username}" has been created successfully! Welcome to Online Judge!')
-            login(request, user)
-            return redirect("home")
+            try:
+                user = form.save()
+                # Create user profile automatically
+                UserProfile.objects.get_or_create(user=user)
+                messages.success(request, f'🎉 Welcome {user.username}! Your account is ready!')
+                login(request, user)
+                return redirect("home")
+            except Exception as e:
+                messages.error(request, 'Something went wrong. Please try again.')
         else:
-            messages.error(request, 'Please fix the errors below.')
+            # Simplify error messages
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if 'password' in field.lower():
+                        messages.error(request, 'Password issue: Make sure both passwords match and are at least 4 characters.')
+                    elif 'username' in field.lower():
+                        messages.error(request, 'Username issue: Pick a different username (this one might be taken).')
+                    elif 'email' in field.lower():
+                        messages.error(request, 'Email issue: Please enter a valid email address.')
+                    else:
+                        messages.error(request, f'{error}')
     else:
         form = RegisterForm()
     return render(request, "registration/register.html", {"form": form})
+
+def simple_login(request):
+    if request.method == 'POST':
+        form = SimpleLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}! 🎉')
+                return redirect('home')
+            else:
+                messages.error(request, 'Wrong username or password. Try again!')
+    else:
+        form = SimpleLoginForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 @login_required
 def profile(request, username=None):

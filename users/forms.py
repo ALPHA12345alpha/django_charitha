@@ -16,6 +16,33 @@ class RegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+        
+        # Make password fields more user-friendly
+        self.fields['password1'].help_text = 'Just pick a password you can remember!'
+        self.fields['password2'].help_text = 'Type the same password again'
+        self.fields['username'].help_text = 'Pick a cool username!'
+        self.fields['email'].help_text = 'We\'ll never spam you, promise!'
+        
+    def clean_password1(self):
+        password1 = self.cleaned_data.get('password1')
+        if len(password1) < 4:
+            raise forms.ValidationError('Password must be at least 4 characters long.')
+        return password1
+
+class SimpleLoginForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your username'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password'
+        })
+    )
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
