@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Create Problem - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="mb-0">🆕 Create New Problem</h3>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <label for="{{ form.title.id_for_label }}" class="form-label">Problem Title</label>
+              {{ form.title }}
+            </div>
+            <div class="col-md-4">
+              <label for="{{ form.difficulty.id_for_label }}" class="form-label">Difficulty</label>
+              {{ form.difficulty }}
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Problem Description</label>
+            {{ form.description }}
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="{{ form.input_format.id_for_label }}" class="form-label">Input Format</label>
+              {{ form.input_format }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.output_format.id_for_label }}" class="form-label">Output Format</label>
+              {{ form.output_format }}
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.constraints.id_for_label }}" class="form-label">Constraints</label>
+            {{ form.constraints }}
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="{{ form.sample_input.id_for_label }}" class="form-label">Sample Input</label>
+              {{ form.sample_input }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.sample_output.id_for_label }}" class="form-label">Sample Output</label>
+              {{ form.sample_output }}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="{{ form.time_limit.id_for_label }}" class="form-label">Time Limit (seconds)</label>
+              {{ form.time_limit }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.memory_limit.id_for_label }}" class="form-label">Memory Limit (MB)</label>
+              {{ form.memory_limit }}
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'problem_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success">Create Problem</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

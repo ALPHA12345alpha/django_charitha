@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }}'s Profile - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body text-center">
+        {% if profile.avatar %}
+          <img src="{{ profile.avatar.url }}" class="rounded-circle mb-3" width="120" height="120" alt="Avatar">
+        {% else %}
+          <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+            <span class="text-white fs-1">{{ profile_user.username|first|upper }}</span>
+          </div>
+        {% endif %}
+        
+        <h4>{{ profile_user.username }}</h4>
+        {% if profile_user.first_name or profile_user.last_name %}
+          <p class="text-muted">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+        {% endif %}
+        
+        <div class="mb-3">
+          <span class="badge bg-primary fs-6">{{ profile.get_rank }}</span>
+          <br>
+          <small class="text-muted">Rating: {{ profile.rating }}</small>
+        </div>
+        
+        {% if profile.bio %}
+          <p class="text-muted">{{ profile.bio }}</p>
+        {% endif %}
+        
+        {% if profile.location %}
+          <p><i class="fas fa-map-marker-alt"></i> {{ profile.location }}</p>
+        {% endif %}
+        
+        {% if is_own_profile %}
+          <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-8">
+    <!-- Statistics -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-success">{{ solved_problems }}</h3>
+            <p class="mb-0">Problems Solved</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-info">{{ total_submissions }}</h3>
+            <p class="mb-0">Total Submissions</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-primary">{{ profile.rating }}</h3>
+            <p class="mb-0">Current Rating</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Submissions -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">📊 Recent Submissions</h5>
+      </div>
+      <div class="card-body">
+        {% if recent_submissions %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Problem</th>
+                  <th>Language</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for submission in recent_submissions %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'problem_detail' submission.problem.pk %}">
+                        {{ submission.problem.title }}
+                      </a>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary">{{ submission.get_language_display }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-{{ submission.get_status_color }} status-{{ submission.status }}">
+                        {{ submission.get_status_display }}
+                      </span>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ submission.created_at|timesince }} ago</small>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          
+          {% if is_own_profile %}
+            <div class="text-center">
+              <a href="{% url 'submission_list' %}" class="btn btn-outline-primary">View All Submissions</a>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="text-center text-muted py-4">
+            <h6>No submissions yet</h6>
+            {% if is_own_profile %}
+              <p>Start by <a href="{% url 'problem_list' %}">solving some problems</a>!</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

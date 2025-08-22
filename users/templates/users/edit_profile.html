@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="mb-0">✏️ Edit Profile</h3>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+            {{ form.bio }}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.location.id_for_label }}" class="form-label">Location</label>
+            {{ form.location }}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.birth_date.id_for_label }}" class="form-label">Birth Date</label>
+            {{ form.birth_date }}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.avatar.id_for_label }}" class="form-label">Avatar</label>
+            {{ form.avatar }}
+            <div class="form-text">Upload a profile picture (optional)</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.theme.id_for_label }}" class="form-label">Theme</label>
+            {{ form.theme }}
+            <div class="form-text">Choose your preferred theme</div>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

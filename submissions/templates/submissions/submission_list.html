@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Submissions - Online Judge{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>📝 Submissions</h2>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Problem</th>
+            <th>User</th>
+            <th>Language</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Memory</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+            <tr>
+              <td>
+                <a href="{% url 'submission_detail' submission.pk %}" class="text-decoration-none">
+                  #{{ submission.pk }}
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'problem_detail' submission.problem.pk %}" class="text-decoration-none">
+                  {{ submission.problem.title }}
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'user_profile' submission.user.username %}" class="text-decoration-none">
+                  {{ submission.user.username }}
+                </a>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ submission.get_language_display }}</span>
+              </td>
+              <td>
+                <span class="badge bg-{{ submission.get_status_color }} status-{{ submission.status }}">
+                  {{ submission.get_status_display }}
+                </span>
+              </td>
+              <td>
+                {% if submission.execution_time %}
+                  {{ submission.execution_time|floatformat:3 }}s
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if submission.memory_used %}
+                  {{ submission.memory_used }}MB
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                <small class="text-muted">{{ submission.created_at|timesince }} ago</small>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                <h5>No submissions yet</h5>
+                <p>Start by <a href="{% url 'problem_list' %}">solving some problems</a>!</p>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+  <nav aria-label="Submissions pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1">First</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+      {% endif %}
+      
+      <li class="page-item active">
+        <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

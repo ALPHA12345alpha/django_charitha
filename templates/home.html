@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Online Judge{% endblock %}
+
+{% block content %}
+{% if not user.is_authenticated %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body text-center">
+        <h3 class="mb-4">🔐 Please Login</h3>
+        <p class="text-muted mb-4">You need to login to access Online Judge</p>
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-outline-primary ms-2">Register</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+      <h1 class="display-4">Welcome to Online Judge! 🚀</h1>
+      <p class="lead">Practice coding, solve problems, and compete with others in programming contests.</p>
+      {% if not user.is_authenticated %}
+        <a class="btn btn-warning btn-lg" href="{% url 'register' %}" role="button">Get Started</a>
+      {% else %}
+        <a class="btn btn-light btn-lg" href="{% url 'problem_list' %}" role="button">Solve Problems</a>
+      {% endif %}
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">🏆 Compete</h5>
+            <p class="card-text">Join programming contests and challenge yourself against other coders.</p>
+            <a href="{% url 'contest_list' %}" class="btn btn-primary">View Contests</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">📈 Track Progress</h5>
+            <p class="card-text">Monitor your coding progress and see how you rank against others.</p>
+            <a href="{% url 'leaderboard' %}" class="btn btn-primary">Leaderboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">📊 Quick Stats</h5>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-6">
+            <h3 class="text-primary">{{ total_problems|default:"0" }}</h3>
+            <small class="text-muted">Problems</small>
+          </div>
+          <div class="col-6">
+            <h3 class="text-success">{{ total_users|default:"0" }}</h3>
+            <small class="text-muted">Users</small>
+          </div>
+        </div>
+        <hr>
+        <div class="row text-center">
+          <div class="col-6">
+            <h3 class="text-info">{{ total_submissions|default:"0" }}</h3>
+            <small class="text-muted">Submissions</small>
+          </div>
+          <div class="col-6">
+            <h3 class="text-warning">{{ active_contests|default:"0" }}</h3>
+            <small class="text-muted">Active Contests</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="mb-0">🚀 Features</h5>
+      </div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          <li class="mb-2">✓ Multiple Programming Languages</li>
+          <li class="mb-2">✓ Real-time Code Execution</li>
+          <li class="mb-2">✓ Automated Testing</li>
+          <li class="mb-2">✓ Contest System</li>
+          <li class="mb-2">✓ Leaderboards & Rankings</li>
+          <li class="mb-2">✓ User Profiles</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

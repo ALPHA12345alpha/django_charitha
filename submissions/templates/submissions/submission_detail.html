@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Submission #{{ submission.pk }} - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Submission #{{ submission.pk }}</h4>
+          <span class="badge bg-{{ submission.get_status_color }} fs-6 status-{{ submission.status }}">
+            {{ submission.get_status_display }}
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Problem:</strong> 
+            <a href="{% url 'problem_detail' submission.problem.pk %}">{{ submission.problem.title }}</a>
+          </div>
+          <div class="col-md-6">
+            <strong>User:</strong> 
+            <a href="{% url 'user_profile' submission.user.username %}">{{ submission.user.username }}</a>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <strong>Language:</strong> {{ submission.get_language_display }}
+          </div>
+          <div class="col-md-4">
+            <strong>Submitted:</strong> {{ submission.created_at }}
+          </div>
+          <div class="col-md-4">
+            {% if submission.judged_at %}
+              <strong>Judged:</strong> {{ submission.judged_at }}
+            {% endif %}
+          </div>
+        </div>
+        
+        {% if submission.execution_time or submission.memory_used %}
+          <div class="row mb-3">
+            {% if submission.execution_time %}
+              <div class="col-md-6">
+                <strong>Execution Time:</strong> {{ submission.execution_time|floatformat:3 }}s
+              </div>
+            {% endif %}
+            {% if submission.memory_used %}
+              <div class="col-md-6">
+                <strong>Memory Used:</strong> {{ submission.memory_used }}MB
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+        
+        {% if submission.output %}
+          <div class="mb-3">
+            <h5>Judge Output</h5>
+            <pre class="bg-light p-3 rounded"><code>{{ submission.output }}</code></pre>
+          </div>
+        {% endif %}
+        
+        {% if not hide_code %}
+          <div class="mb-3">
+            <h5>Source Code</h5>
+            <pre class="bg-dark text-light p-3 rounded"><code class="language-{{ submission.language }}">{{ submission.code }}</code></pre>
+          </div>
+        {% else %}
+          <div class="alert alert-info">
+            <i class="fas fa-lock"></i> Source code is only visible to the submission owner and staff.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">📊 Submission Info</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Status:</span>
+            <span class="status-{{ submission.status }}">{{ submission.get_status_display }}</span>
+          </div>
+        </div>
+        
+        {% if submission.score %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <span>Score:</span>
+              <span class="text-success">{{ submission.score }}/100</span>
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Language:</span>
+            <span>{{ submission.get_language_display }}</span>
+          </div>
+        </div>
+        
+        {% if submission.status == 'PENDING' or submission.status == 'JUDGING' %}
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Judging...</span>
+            </div>
+            <p class="mt-2">Judging in progress...</p>
+            <button class="btn btn-sm btn-outline-primary" onclick="checkStatus()">Refresh Status</button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="mb-0">🔗 Quick Links</h5>
+      </div>
+      <div class="card-body">
+        <a href="{% url 'problem_detail' submission.problem.pk %}" class="btn btn-outline-primary btn-sm w-100 mb-2">
+          View Problem
+        </a>
+        <a href="{% url 'submission_list' %}" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+          All Submissions
+        </a>
+        {% if submission.user == user %}
+          <a href="{% url 'problem_detail' submission.problem.pk %}" class="btn btn-outline-success btn-sm w-100">
+            Submit Again
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+function checkStatus() {
+    fetch(`/submissions/status/{{ submission.pk }}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'PENDING' && data.status !== 'JUDGING') {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Auto-refresh for pending submissions
+{% if submission.status == 'PENDING' or submission.status == 'JUDGING' %}
+setInterval(checkStatus, 3000);
+{% endif %}
+</script>
+{% endblock %}
+{% endblock %}

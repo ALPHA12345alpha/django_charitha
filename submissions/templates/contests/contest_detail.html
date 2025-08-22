@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contest.title }} - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">{{ contest.title }}</h3>
+          {% if contest.is_active %}
+            <span class="badge bg-success fs-6">🔴 Live</span>
+          {% elif contest.is_upcoming %}
+            <span class="badge bg-warning fs-6">⏰ Upcoming</span>
+          {% else %}
+            <span class="badge bg-secondary fs-6">✅ Ended</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="mb-4">
+          <h5>Description</h5>
+          <p>{{ contest.description|linebreaks }}</p>
+        </div>
+        
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6>Start Time</h6>
+            <p>{{ contest.start_time|date:"F d, Y H:i T" }}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>End Time</h6>
+            <p>{{ contest.end_time|date:"F d, Y H:i T" }}</p>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <h5>Problems ({{ problems.count }})</h5>
+          <div class="row">
+            {% for problem in problems %}
+              <div class="col-md-6 mb-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      {% if contest.is_active or not contest.is_upcoming %}
+                        <a href="{% url 'problem_detail' problem.pk %}" class="text-decoration-none">
+                          {{ problem.title }}
+                        </a>
+                      {% else %}
+                        {{ problem.title }}
+                      {% endif %}
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="badge bg-{{ problem.difficulty }} difficulty-{{ problem.difficulty }}">
+                        {{ problem.get_difficulty_display }}
+                      </span>
+                      <small class="text-muted">
+                        {{ problem.time_limit }}s / {{ problem.memory_limit }}MB
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-12">
+                <p class="text-muted">No problems added to this contest yet.</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">📊 Contest Info</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Status:</span>
+            {% if contest.is_active %}
+              <span class="text-success">Live</span>
+            {% elif contest.is_upcoming %}
+              <span class="text-warning">Upcoming</span>
+            {% else %}
+              <span class="text-secondary">Ended</span>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Problems:</span>
+            <span>{{ problems.count }}</span>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Duration:</span>
+            <span>
+              {% widthratio contest.end_time|timeuntil:contest.start_time 3600 1 %} hours
+            </span>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Created by:</span>
+            <span>
+              <a href="{% url 'user_profile' contest.created_by.username %}">
+                {{ contest.created_by.username }}
+              </a>
+            </span>
+          </div>
+        </div>
+        
+        {% if contest.is_active %}
+          <div class="alert alert-success">
+            <strong>Contest is live!</strong><br>
+            You can now solve the problems.
+          </div>
+        {% elif contest.is_upcoming %}
+          <div class="alert alert-warning">
+            <strong>Contest starts in:</strong><br>
+            <span id="countdown"></span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="mb-0">🔗 Quick Links</h5>
+      </div>
+      <div class="card-body">
+        <a href="{% url 'contest_list' %}" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+          All Contests
+        </a>
+        {% if contest.is_active or not contest.is_upcoming %}
+          <a href="{% url 'submission_list' %}" class="btn btn-outline-primary btn-sm w-100">
+            View Submissions
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if contest.is_upcoming %}
+{% block extra_js %}
+<script>
+// Countdown timer for upcoming contests
+function updateCountdown() {
+    const startTime = new Date('{{ contest.start_time|date:"c" }}').getTime();
+    const now = new Date().getTime();
+    const distance = startTime - now;
+    
+    if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById('countdown').innerHTML = 
+            days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+    } else {
+        document.getElementById('countdown').innerHTML = "Contest has started!";
+        location.reload();
+    }
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+{% endblock %}
+{% endif %}
+{% endblock %}

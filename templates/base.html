@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{% if user.is_authenticated and user.userprofile.theme == 'dark' %}dark{% else %}light{% endif %}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Online Judge{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet">
+  <style>
+    .status-AC { color: white; }
+    .status-WA { color: white; }
+    .status-TLE { color: #007bff; }
+    .status-CE { color: #ffc107; }
+    .status-RE { color: #dc3545; }
+    .status-PENDING { color: #6c757d; }
+    .status-JUDGING { color: #007bff; }
+    .difficulty-easy { color: #28a745; }
+    .difficulty-medium { color: #ffc107; }
+    .difficulty-hard { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'home' %}">🏆 Online Judge</a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'problem_list' %}">Problems</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'submission_list' %}">Submissions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'contest_list' %}">Contests</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'leaderboard' %}">Leaderboard</a>
+          </li>
+        </ul>
+        
+        <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'edit_profile' %}">Settings</a></li>
+                <li><a class="dropdown-item" href="#" onclick="toggleTheme()">🌓 Toggle Theme</a></li>
+                {% if user.is_staff %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'problem_create' %}">Create Problem</a></li>
+                  <li><a class="dropdown-item" href="{% url 'contest_create' %}">Create Contest</a></li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'register' %}" class="btn btn-warning">Register</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <main class="container mt-4">
+    {% csrf_token %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+  </main>
+  
+  <footer class="bg-light mt-5 py-4">
+    <div class="container text-center">
+      <p class="mb-0">&copy; 2024 Online Judge. Built with Django.</p>
+    </div>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+  
+  <script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-bs-theme', newTheme);
+    
+    // Save theme preference
+    fetch('/accounts/toggle-theme/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({theme: newTheme})
+    });
+  }
+  </script>
+  
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

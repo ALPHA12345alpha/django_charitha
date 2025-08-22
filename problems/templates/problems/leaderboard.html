@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Online Judge{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="mb-0">🏆 Leaderboard</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Problems Solved</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+                <tr>
+                  <td>
+                    <strong>{{ forloop.counter }}</strong>
+                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% endif %}
+                  </td>
+                  <td>
+                    <a href="{% url 'user_profile' user.username %}" class="text-decoration-none">
+                      {{ user.username }}
+                    </a>
+                  </td>
+                  <td>
+                    <span class="badge bg-success">{{ user.solved_count }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary">{{ user.userprofile.rating|default:"1200" }}</span>
+                    <small class="text-muted">{{ user.userprofile.get_rank|default:"Newbie" }}</small>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">
+                    No users found. Be the first to solve a problem!
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
