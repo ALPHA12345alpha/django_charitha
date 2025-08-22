@@ -28,6 +28,13 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['*'] if os.environ.get('RAILWAY_ENVIRONMENT') else ['127.0.0.1', 'localhost']
 
+# CSRF settings for Railway
+if os.environ.get('RAILWAY_ENVIRONMENT'):
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.up.railway.app',
+        'https://*.railway.app'
+    ]
+
 
 # Application definition
 
